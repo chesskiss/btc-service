@@ -19,19 +19,26 @@ docker build -t btc-service .
 
 ## Usage
 
-### Run 
+### Run process
 ```bash
-docker run -p 8080:8080 btc-service
+docker run --name btc-service -p 8080:8080 btc-service
 
-curl http://localhost:8080/api/v1/ltp
 ```
 
 Note- The service runs on port 8080 by default. You can customize this with the `PORT` environment variable:
 ```bash
-# Run on a different port
-docker run -p 9000:9000 -e PORT=9000 btc-service
+docker run --name btc-service -p 9000:9000 -e PORT=<YOUR PREFFFFERED PORT> btc-service
 ```
 
+### Stop process
+
+From a new terminal run 
+```bash
+docker rm -f btc-service
+```
+Or simply ctrl+C
+
+### To send an http request:
 
 **Query Parameters:**
 
@@ -55,39 +62,39 @@ Get multiple pairs:
 curl "http://localhost:8080/api/v1/ltp?pairs=BTC/USD,BTC/EUR"
 ```
 
-### Response Format
-
-```json
-{
-  "ltp": [
-    {
-      "pair": "BTC/USD",
-      "amount": 52000.12
-    },
-    {
-      "pair": "BTC/EUR",
-      "amount": 50000.12
-    }
-  ]
-}
-```
-
 
 ## Testing
 
 Run all tests:
 ```bash
-go test ./...
+go test ./tests/...
 ```
 
 Run with coverage:
 ```bash
-go test -cover ./...
-```
-
-Run integration tests:
-```bash
-go test -v ./tests/integration/...
+go test -coverpkg=./... -coverprofile=coverage.out ./...
+go tool cover -func=coverage.out
 ```
 
 
+
+
+### Response Format
+
+Given curl "http://localhost:8080/api/v1/ltp?pairs=BTC/<currency 1>,BTC/<currency 2>..."
+The returned response:
+```json
+{
+  "ltp": [
+    {
+      "pair": "BTC/<currency 1>",
+      "amount": 0000.00
+    },
+    {
+      "pair": "BTC/<currency 2>",
+      "amount": 0000.00
+    }
+    ...
+  ]
+}
+```
