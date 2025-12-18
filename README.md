@@ -30,6 +30,7 @@ Note- The service runs on port 8080 by default. You can customize this with the 
 docker run --name btc-service -p 9000:9000 -e PORT=<YOUR PREFFFFERED PORT> btc-service
 ```
 
+
 ### Stop process
 
 From a new terminal run 
@@ -38,6 +39,7 @@ docker rm -f btc-service
 ```
 Or simply ctrl+C
 
+
 ### To send an http request:
 
 **Query Parameters:**
@@ -45,7 +47,7 @@ Or simply ctrl+C
 - `pairs` (optional): Comma-separated list of currency pairs (e.g., `BTC/USD,BTC/EUR`)
 - If omitted, returns all supported pairs: BTC/USD, BTC/EUR, BTC/CHF
 
-### Examples
+#### Examples
 
 Get all pairs:
 ```bash
@@ -79,7 +81,7 @@ go tool cover -func=coverage.out
 
 
 
-### Response Format
+## Response Format
 
 Given curl "http://localhost:8080/api/v1/ltp?pairs=BTC/<currency 1>,BTC/<currency 2>..."
 The returned response:
