@@ -10,7 +10,7 @@ A Go microservice that provides Last Traded Price data for Bitcoin across multip
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/btc-service.git
+git clone https://github.com/chesskiss/btc-service.git
 cd btc-service
 
 # Build
