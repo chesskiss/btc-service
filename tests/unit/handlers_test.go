@@ -6,13 +6,19 @@ import (
 	"testing"
 
 	"github.com/chesskiss/btc-service/handlers"
+	"github.com/chesskiss/btc-service/internal/middleware"
+	"github.com/gorilla/mux"
 )
 
 func TestLTPHandler(t *testing.T) {
+	r := mux.NewRouter()
+	r.HandleFunc("/api/v1/ltp", handlers.LTPHandler).Methods("GET")
+	handler := middleware.LoggingMiddleware(r)
+
 	req := httptest.NewRequest("GET", "/api/v1/ltp", nil)
 	w := httptest.NewRecorder()
 
-	handlers.LTPHandler(w, req)
+	handler.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
@@ -24,10 +30,14 @@ func TestLTPHandler(t *testing.T) {
 }
 
 func TestLTPHandlerWithPairs(t *testing.T) {
+	r := mux.NewRouter()
+	r.HandleFunc("/api/v1/ltp", handlers.LTPHandler).Methods("GET")
+	handler := middleware.LoggingMiddleware(r)
+
 	req := httptest.NewRequest("GET", "/api/v1/ltp?pairs=BTC/USD", nil)
 	w := httptest.NewRecorder()
 
-	handlers.LTPHandler(w, req)
+	handler.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)

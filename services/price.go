@@ -1,8 +1,12 @@
 package services
 
 import (
+    "context"
     "fmt"
     "log"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/attribute"
 
     "github.com/chesskiss/btc-service/clients"
 )
@@ -16,14 +20,35 @@ type LTPResponse struct {
     LTP []PairPrice `json:"ltp"`
 }
 
-func GetPrices(pairsParam string) []PairPrice {
+type PriceResult struct {
+    Prices       []PairPrice
+    ErrorsCount  int
+    KrakenCalls  int
+    ErrorMessage string
+}
+
+func GetPrices(ctx context.Context, pairsParam string) PriceResult {
+    tracer := otel.Tracer("btc-service")
+    ctx, span := tracer.Start(ctx, "get_prices")
+    defer span.End()
+
     currencies := resolveCurrencies(pairsParam)
 
+    span.SetAttributes(
+        attribute.StringSlice("currencies", currencies),
+        attribute.Int("currency_count", len(currencies)),
+    )
+
     var prices []PairPrice
+    var errorsCount int
+    var lastError string
+
     for _, currency := range currencies {
-        price, err := clients.GetBTCPrice(currency)
+        price, err := clients.GetBTCPrice(ctx, currency)
         if err != nil {
             log.Printf("Error fetching BTC/%s: %v\n", currency, err)
+            errorsCount++
+            lastError = fmt.Sprintf("BTC/%s: %v", currency, err)
             continue
         }
 
@@ -33,7 +58,17 @@ func GetPrices(pairsParam string) []PairPrice {
         })
     }
 
-    return prices
+    span.SetAttributes(
+        attribute.Int("prices_fetched", len(prices)),
+        attribute.Int("errors_count", errorsCount),
+    )
+
+    return PriceResult{
+        Prices:       prices,
+        ErrorsCount:  errorsCount,
+        KrakenCalls:  len(currencies), // Each currency requires one Kraken API call
+        ErrorMessage: lastError,
+    }
 }
 
 func resolveCurrencies(pairsParam string) []string {
